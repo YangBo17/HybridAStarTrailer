@@ -15,6 +15,8 @@ include("rs_path.jl")
 include("grid_a_star.jl")
 include("trailerlib.jl")
 
+export calc_hybrid_astar_path
+
 const XY_GRID_RESOLUTION = 2.0 #[m]
 const YAW_GRID_RESOLUTION = deg2rad(15.0) #[rad]
 const GOAL_TYAW_TH = deg2rad(5.0) #[rad]
@@ -591,10 +593,6 @@ function main()
     println(PROGRAM_FILE," Done!!")
 end
 
-# if length(PROGRAM_FILE)!=0 &&
-# 	occursin(PROGRAM_FILE, @__FILE__)
-#     main()
-# end
 
 end #module
 

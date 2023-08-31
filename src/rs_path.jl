@@ -4,9 +4,10 @@
 # author: Atsushi Sakai
 #
 
+##
 module rs_path
 
-using PyPlot
+using Plots
 using Test
 
 const STEP_SIZE = 0.1
@@ -892,24 +893,13 @@ function main()
 
     rc, rds = calc_curvature(bpath.x, bpath.y, bpath.yaw, bpath.directions)
 
-    subplots(1)
-    plot(bpath.x, bpath.y,"-r", label=get_label(bpath))
+    fig_rs = plot(bpath.x, bpath.y, color=:red, label="R-S curve", ratio=:equal)
 
-    plot(start_x, start_y)
-    plot(end_x, end_y)
-
-    legend()
-    grid(true)
-    axis("equal")
-
-    subplots(1)
-    plot(rc, ".r", label="reeds shepp")
-    grid(true)
-    title("Curvature")
-
-    show()
+    plot!(fig_rs, [start_x], [start_y], color=:red, seriestype=:scatter, marker=:star5, label="start")
+    plot!(fig_rs, [end_x], [end_y], color=:red, seriestype=:scatter, marker=:circle, label="goal")
 
     println(PROGRAM_FILE," Done!!")
+    return fig_rs
 end
 
 

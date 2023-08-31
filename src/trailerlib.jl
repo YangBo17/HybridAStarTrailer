@@ -3,7 +3,7 @@
 #
 # author: Atsushi Sakai(@Atsushi_twi)
 #
-
+##
 module trailerlib
 
 using PyPlot
@@ -110,8 +110,6 @@ function rect_check(ix::Float64, iy::Float64, iyaw::Float64,
     return true #OK
 end
 
-
-
 function calc_trailer_yaw_from_xyyaw(
                    x::Array{Float64},
                    y::Array{Float64},
@@ -131,7 +129,6 @@ function calc_trailer_yaw_from_xyyaw(
 
     return tyaw
 end
-
 
 function trailer_motion_model(x, y, yaw0, yaw1, D, d, L, delta)
     """
@@ -290,7 +287,7 @@ function main()
 
     plot_trailer(x, y, yaw0, yaw1, 0.0)
 
-    DF = (LF + LB)/2.0 - LB
+    DF = (LF + LB)/2.0 - LB 
     DFR = (LF + LB)/2.0 + 0.3 
 
     DT = (LTF + LTB)/2.0 - LTB

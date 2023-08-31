@@ -5,6 +5,7 @@
 #
 
 using PyPlot
+pygui(:qt5)
 
 include("../src/trailer_hybrid_a_star.jl")
 
@@ -106,9 +107,5 @@ function show_animation(path, oox, ooy, sx, sy, syaw0, syaw1, gx, gy, gyaw0, gya
 
 end
 
-
-if length(PROGRAM_FILE)!=0 &&
-	occursin(PROGRAM_FILE, @__FILE__)
-    main()
-end
+main()
 
