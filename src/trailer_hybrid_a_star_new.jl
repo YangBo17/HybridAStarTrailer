@@ -16,6 +16,7 @@ include("grid_a_star.jl")
 include("trailerlib.jl")
 
 export calc_hybrid_astar_path
+export Path
 
 const XY_GRID_RESOLUTION = 2.0 #[m]
 const YAW_GRID_RESOLUTION = deg2rad(15.0) #[rad]
@@ -25,16 +26,16 @@ const N_STEER = 20.0 # number of steer command
 const EXTEND_AREA= 5.0 #[m] map extend length
 const SKIP_COLLISION_CHECK= 4 # skip number for collision check
  
+const WB = trailerlib.WB #[m] Wheel base
+const LT = trailerlib.LT #[m] length of trailer
+const MAX_STEER = trailerlib.MAX_STEER #[rad] maximum steering angle
+
 const SB_COST = 100.0 # switch back penalty cost
 const BACK_COST = 5.0 # backward penalty cost
 const STEER_CHANGE_COST = 5.0 # steer angle change penalty cost
 const STEER_COST = 1.0 # steer angle change penalty cost
 const JACKKNIF_COST= 200.0 # Jackknif cost
 const H_COST = 5.0 # Heuristic cost
- 
-const WB = trailerlib.WB #[m] Wheel base
-const LT = trailerlib.LT #[m] length of trailer
-const MAX_STEER = trailerlib.MAX_STEER #[rad] maximum steering angle
 
 
 struct Node
@@ -592,7 +593,6 @@ function main()
 
     println(PROGRAM_FILE," Done!!")
 end
-
 
 end #module
 
