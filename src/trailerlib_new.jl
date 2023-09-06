@@ -62,6 +62,20 @@ function check_collision(x::Array{Float64},
 
 end
 
+function check_point_collision(x::Array{Float64},
+                         y::Array{Float64},
+                         kdtree::KDTree,
+                         wbr::Float64)::Bool
+    ```
+    adopt dilation of obstacles, therefore the collision check can be simplified
+    ```
+    for (ix, iy) in zip(x, y)
+        ids = inrange(kdtree, [ix, iy], wbr, true)
+        if length(ids) == 0 continue end
+    end
+    return true
+end
+
 
 function rect_check(ix::Float64, iy::Float64, iyaw::Float64,
                     ox::Array{Float64}, oy::Array{Float64},
@@ -82,7 +96,7 @@ function rect_check(ix::Float64, iy::Float64, iyaw::Float64,
             x1 = vrx[i] - lx
             y1 = vry[i] - ly
             x2 = vrx[i+1] - lx
-            y2 = vry[i+1] - ly
+            y2 = vry[i+1] - ly 
             d1 = hypot(x1,y1)
             d2 = hypot(x2,y2)
             theta1 = atan(y1,x1)
@@ -156,7 +170,6 @@ function check_trailer_collision(
                    )
     """
     collision check function for trailer
-
     """
 
     if kdtree == nothing
@@ -188,6 +201,28 @@ function check_trailer_collision(
     end
 
     return true #OK
+end
+
+function check_trailer_collision(ox::Array{Float64},
+                                 oy::Array{Float64},
+                                 x::Array{Float64},
+                                 y::Array{Float64},
+                                 yaw0::Array{Float64},
+                                 yaw1::Array{Float64},
+                                 kdtree = nothing)
+    ```
+    collision check for trailer, but simplified by point mass
+    ```
+    x1 = x 
+    if kdtree == nothing
+        kdtree = KDTree([ox'; oy'])
+    end
+    wbr = 0.2
+    if !check_point_collision(x, y, kdtree, wbr)
+        return false
+    end
+
+    return true
 end
 
 
