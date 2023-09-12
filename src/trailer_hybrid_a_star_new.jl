@@ -13,7 +13,7 @@ using DataStructures
 
 include("rs_path.jl")
 include("grid_a_star.jl")
-include("trailerlib.jl")
+include("trailerlib_new.jl")
 
 export calc_hybrid_astar_path
 export Path
@@ -84,6 +84,7 @@ function calc_hybrid_astar_path(sx::Float64, sy::Float64, syaw::Float64, syaw1::
                                 gx::Float64, gy::Float64, gyaw::Float64, gyaw1::Float64,
                                 ox::Array{Float64}, oy::Array{Float64},
                                 xyreso::Float64, yawreso::Float64,
+                                d1::Float64
                                 )
     """
     sx: start x position [m]
@@ -129,7 +130,7 @@ function calc_hybrid_astar_path(sx::Float64, sy::Float64, syaw::Float64, syaw1::
         delete!(open, c_id)
         closed[c_id] = current
 
-        isupdated, fpath = update_node_with_analystic_expantion(current, ngoal, c, ox, oy, kdtree, gyaw1)
+        isupdated, fpath = update_node_with_analystic_expantion(current, ngoal, c, ox, oy, kdtree, gyaw1, d1, xyreso)
         if isupdated # found
             fnode = fpath
             break
@@ -140,7 +141,7 @@ function calc_hybrid_astar_path(sx::Float64, sy::Float64, syaw::Float64, syaw1::
         for i in 1:nmotion
             node = calc_next_node(current, c_id, u[i], d[i], c)
 
-            if !verify_index(node, c, ox, oy, inityaw1, kdtree) continue end
+            if !verify_index(node, c, ox, oy, inityaw1, kdtree, d1, xyreso) continue end
 
             node_ind = calc_index(node, c)
 
@@ -173,10 +174,12 @@ function update_node_with_analystic_expantion(current::Node,
                                              ox,
                                              oy,
                                              kdtree,
-                                             gyaw1::Float64
+                                             gyaw1::Float64,
+                                             d1,
+                                             xyreso
                                             )
 
-    apath = analystic_expantion(current, ngoal, c, ox, oy, kdtree)
+    apath = analystic_expantion(current, ngoal, c, ox, oy, kdtree, d1,xyreso)
     if apath != nothing
         fx = apath.x[2:end]
         fy = apath.y[2:end]
@@ -257,7 +260,7 @@ function calc_rs_path_cost(rspath::rs_path.Path, yaw1)
 end
 
 
-function analystic_expantion(n::Node, ngoal::Node, c::Config, ox, oy, kdtree)
+function analystic_expantion(n::Node, ngoal::Node, c::Config, ox, oy, kdtree, d1, xyreso)
 
     sx = n.x[end]
     sy = n.y[end]
@@ -284,7 +287,7 @@ function analystic_expantion(n::Node, ngoal::Node, c::Config, ox, oy, kdtree)
         steps = MOTION_RESOLUTION*path.directions
         yaw1 = trailerlib.calc_trailer_yaw_from_xyyaw(path.x, path.y, path.yaw, n.yaw1[end], steps)
         ind = 1:SKIP_COLLISION_CHECK:length(path.x)
-        if trailerlib.check_trailer_collision(ox, oy, path.x[ind], path.y[ind], path.yaw[ind], yaw1[ind], kdtree = kdtree)
+        if trailerlib.check_trailer_collision(ox, oy, path.x[ind], path.y[ind], path.yaw[ind], yaw1[ind], kdtree = kdtree, d1=d1, xyreso=xyreso)
             # plot(path.x, path.y, "-^b")
             return path # path is ok
         end
@@ -305,7 +308,7 @@ function calc_motion_inputs()
 end
 
 
-function verify_index(node::Node, c::Config, ox, oy, inityaw1, kdtree)
+function verify_index(node::Node, c::Config, ox, oy, inityaw1, kdtree, d1, xyreso)
 
     # overflow map
     if (node.xind - c.minx) >= c.xw
@@ -323,7 +326,7 @@ function verify_index(node::Node, c::Config, ox, oy, inityaw1, kdtree)
     steps = MOTION_RESOLUTION*node.directions
     yaw1 = trailerlib.calc_trailer_yaw_from_xyyaw(node.x, node.y, node.yaw, inityaw1, steps)
     ind = 1:SKIP_COLLISION_CHECK:length(node.x)
-    if !trailerlib.check_trailer_collision(ox, oy, node.x[ind], node.y[ind], node.yaw[ind], yaw1[ind], kdtree = kdtree)
+    if !trailerlib.check_trailer_collision(ox, oy, node.x[ind], node.y[ind], node.yaw[ind], yaw1[ind], kdtree = kdtree, d1 = d1, xyreso=xyreso)
         return false
     end
 

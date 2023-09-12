@@ -152,7 +152,7 @@ function check_trailer_collision(
                     y::Array{Float64},
                     yaw0::Array{Float64},
                     yaw1::Array{Float64};
-                    kdtree = nothing
+                    kdtree = nothing,
                    )
     """
     collision check function for trailer

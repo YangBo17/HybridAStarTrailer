@@ -208,20 +208,22 @@ function check_trailer_collision(ox::Array{Float64},
                                  x::Array{Float64},
                                  y::Array{Float64},
                                  yaw0::Array{Float64},
-                                 yaw1::Array{Float64},
-                                 kdtree = nothing)
+                                 yaw1::Array{Float64};
+                                 kdtree = nothing,
+                                 d1::Float64,
+                                 xyreso::Float64)
     ```
     collision check for trailer, but simplified by point mass
     ```
-    x1 = x 
+    x1 = x .- d1 * cos.(yaw1)
+    y1 = y .- d1 * sin.(yaw1)
     if kdtree == nothing
         kdtree = KDTree([ox'; oy'])
     end
-    wbr = 0.2
-    if !check_point_collision(x, y, kdtree, wbr)
+    wbr = xyreso * 1.2
+    if !check_point_collision(x1, y1, kdtree, wbr)
         return false
     end
-
     return true
 end
 
