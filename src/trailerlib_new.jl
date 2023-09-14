@@ -71,7 +71,9 @@ function check_point_collision(x::Array{Float64},
     ```
     for (ix, iy) in zip(x, y)
         ids = inrange(kdtree, [ix, iy], wbr, true)
-        if length(ids) == 0 continue end
+        if length(ids) != 0 
+            return false
+        end
     end
     return true
 end
@@ -220,7 +222,7 @@ function check_trailer_collision(ox::Array{Float64},
     if kdtree == nothing
         kdtree = KDTree([ox'; oy'])
     end
-    wbr = xyreso * 1.2
+    wbr = xyreso * 1.0
     if !check_point_collision(x1, y1, kdtree, wbr)
         return false
     end

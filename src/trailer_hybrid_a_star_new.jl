@@ -106,7 +106,7 @@ function calc_hybrid_astar_path(sx::Float64, sy::Float64, syaw::Float64, syaw1::
     nstart = Node(round(Int64,sx/xyreso), round(Int64,sy/xyreso), round(Int64, syaw/yawreso),true,[sx],[sy],[syaw],[syaw1],[true],0.0,0.0, -1)
     ngoal = Node(round(Int64,gx/xyreso), round(Int64,gy/xyreso), round(Int64,gyaw/yawreso),true,[gx],[gy],[gyaw],[gyaw1],[true],0.0,0.0, -1)
 
-    h_dp = calc_holonomic_with_obstacle_heuristic(ngoal, ox, oy, xyreso)
+    h_dp = calc_holonomic_with_obstacle_heuristic(ngoal, ox, oy, xyreso, d1/4)
 
     open, closed = Dict{Int64, Node}(), Dict{Int64, Node}()
     fnode = nothing
@@ -426,8 +426,8 @@ function calc_index(node::Node, c::Config)
 end
 
 
-function calc_holonomic_with_obstacle_heuristic(gnode::Node, ox::Array{Float64}, oy::Array{Float64}, xyreso::Float64)
-    h_dp = grid_a_star.calc_dist_policy(gnode.x[end], gnode.y[end], ox, oy, xyreso, 1.0)
+function calc_holonomic_with_obstacle_heuristic(gnode::Node, ox::Array{Float64}, oy::Array{Float64}, xyreso::Float64, vradi::Float64)
+    h_dp = grid_a_star.calc_dist_policy(gnode.x[end], gnode.y[end], ox, oy, xyreso, vradi)
     return h_dp
 end
 
