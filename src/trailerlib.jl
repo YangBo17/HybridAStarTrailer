@@ -6,8 +6,14 @@
 ##
 module trailerlib
 
+using Revise
 using PyPlot
 using NearestNeighbors
+includet("../../models/mytrailerlib.jl")
+
+using YAML
+param = YAML.load_file("../../models/vehicle.yml")
+name = "trailer_b"
 
 # Vehicle parameter
 const WB = 3.7  #[m] wheel base: rear to front steer
@@ -90,7 +96,7 @@ function rect_check(ix::Float64, iy::Float64, iyaw::Float64,
             tmp = (x1*x2+y1*y2)/(d1*d2)
 
             if tmp >= 1.0
-                tmp = 1.0
+                tmp = 1.0 
             elseif tmp <= 0.0
                 tmp = 0.0
             end
@@ -138,6 +144,7 @@ function trailer_motion_model(x, y, yaw0, yaw1, D, d, L, delta)
     """
     x += D*cos(yaw0)
     y += D*sin(yaw0)
+
     yaw0 += D/L*tan(delta)
     yaw1 += D/d*sin(yaw0 - yaw1)
 
@@ -153,6 +160,7 @@ function check_trailer_collision(
                     yaw0::Array{Float64},
                     yaw1::Array{Float64};
                     kdtree = nothing,
+                    body::mytrailerlib.Body
                    )
     """
     collision check function for trailer
@@ -163,24 +171,31 @@ function check_trailer_collision(
 		kdtree = KDTree([ox'; oy'])
     end
 
+    LTF = - body.d1 + body.dl * (1 + body.margin)
+    LTB = - body.d1 - body.dl * body.margin
+    W = body.w * (1 + 2 * body.margin)
+
     vrxt = [LTF, LTF, -LTB, -LTB, LTF]
     vryt = [-W/2.0, W/2.0, W/2.0, -W/2.0, -W/2.0]
 
     #  
     DT = (LTF + LTB)/2.0 - LTB
-    DTR = (LTF + LTB)/2.0 + 0.3 
+    DTR = (LTF + LTB)/2.0 + body.w / 9
 
     # check trailer
     if !check_collision(x, y, yaw1, kdtree, ox, oy, DT, DTR, vrxt, vryt)
         return false
     end
+    
+    LF = + body.d0 * (1 + body.margin)
+    LB = - body.d0 * body.margin
 
     vrxf = [LF, LF, -LB, -LB, LF]
     vryf = [-W/2.0, W/2.0, W/2.0, -W/2.0, -W/2.0]
   
     # bubble parameter
     DF = (LF + LB)/2.0 - LB
-    DFR = (LF + LB)/2.0 + 0.3 
+    DFR = (LF + LB)/2.0 + body.w / 9
 
     # check front trailer
     if !check_collision(x, y, yaw0, kdtree, ox, oy, DF, DFR, vrxf, vryf)

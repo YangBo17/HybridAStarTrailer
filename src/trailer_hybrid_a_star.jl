@@ -6,14 +6,18 @@
 
 module trailer_hybrid_a_star
 
+using Revise
 using PyPlot
 using DataFrames
 using NearestNeighbors
 using DataStructures 
+using YAML
 
-include("rs_path.jl")
-include("grid_a_star.jl")
-include("trailerlib.jl")
+includet("rs_path.jl")
+includet("grid_a_star.jl")
+includet("trailerlib.jl")
+
+param = YAML.load_file("../../config/hybrid_a_star.yml")
 
 const XY_GRID_RESOLUTION = 2.0 #[m]
 const YAW_GRID_RESOLUTION = deg2rad(15.0) #[rad]
