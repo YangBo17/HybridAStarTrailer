@@ -6,35 +6,24 @@
 ##
 module trailerlib
 
-using Revise
 using PyPlot
 using NearestNeighbors
-includet("../../models/mytrailerlib.jl")
-
 using YAML
-param = YAML.load_file("../../models/vehicle.yml")
-name = "trailer_b"
+param = YAML.load(open("/home/yangbo/Code/DifferentialFlatness/config/vehicle.yml"))
+name = "trailer_a"
 
 # Vehicle parameter
-const WB = 3.7  #[m] wheel base: rear to front steer
-const LT = 8.0 #[m] rear to trailer wheel
-const W = 2.6 #[m] width of vehicle
-const LF = 4.5 #[m] distance from rear to vehicle front end of vehicle
-const LB = 1.0 #[m] distance from rear to vehicle back end of vehicle
-const LTF = 1.0 #[m] distance from rear to vehicle front end of trailer
-const LTB = 9.0 #[m] distance from rear to vehicle back end of trailer
+const WB = param[name]["d0"] #[m] wheel base: rear to front steer
+const LT = param[name]["d1"] #[m] rear to trailer wheel
+const W = param[name]["w"] * (1 + 2 * param[name]["margin"]) #[m] width of vehicle
+const LF = param[name]["d0"] * (1 + param[name]["margin"]) #[m] distance from rear to vehicle front end of vehicle
+const LB = - param[name]["d0"] * param[name]["margin"] #[m] distance from rear to vehicle back end of vehicle
+const LTF = - param[name]["d1"] + param[name]["dl"] * (1 + param[name]["margin"])#[m] distance from rear to vehicle front end of trailer
+const LTB = - param[name]["d1"] - param[name]["dl"] * param[name]["margin"] #[m] distance from rear to vehicle back end of trailer
 const MAX_STEER = 0.6 #[rad] maximum steering angle 
-const TR = 0.5 # Tyre radius [m] for plot
-const TW = 1.0 # Tyre width [m] for plot
+const TR = param[name]["tr"] # Tyre radius [m] for plot
+const TW = param[name]["tw"] # Tyre width [m] for plot
 
-# for collision check
-const WBUBBLE_DIST = 3.5 #distance from rear and the center of whole bubble
-const WBUBBLE_R = 10.0 # whole bubble radius
-const B = 4.45 # distance from rear to vehicle front end
-const C = 11.54 # distance from rear to vehicle back end
-const I = 8.55 # width of vehicle
-const VRX = [C, C, -B, -B, C ]
-const VRY = [-I/2.0, I/2.0, I/2.0, -I/2.0, -I/2.0]
 
 function check_collision(x::Array{Float64},
                          y::Array{Float64},
@@ -160,7 +149,6 @@ function check_trailer_collision(
                     yaw0::Array{Float64},
                     yaw1::Array{Float64};
                     kdtree = nothing,
-                    body::mytrailerlib.Body
                    )
     """
     collision check function for trailer
@@ -171,31 +159,24 @@ function check_trailer_collision(
 		kdtree = KDTree([ox'; oy'])
     end
 
-    LTF = - body.d1 + body.dl * (1 + body.margin)
-    LTB = - body.d1 - body.dl * body.margin
-    W = body.w * (1 + 2 * body.margin)
-
-    vrxt = [LTF, LTF, -LTB, -LTB, LTF]
+    vrxt = [LTF, LTF, LTB, LTB, LTF]
     vryt = [-W/2.0, W/2.0, W/2.0, -W/2.0, -W/2.0]
 
     #  
-    DT = (LTF + LTB)/2.0 - LTB
-    DTR = (LTF + LTB)/2.0 + body.w / 9
+    DT = (LTF - LTB)/2.0 + LTB
+    DTR = (LTF - LTB)/2.0 + W / 9
 
     # check trailer
     if !check_collision(x, y, yaw1, kdtree, ox, oy, DT, DTR, vrxt, vryt)
         return false
     end
     
-    LF = + body.d0 * (1 + body.margin)
-    LB = - body.d0 * body.margin
-
-    vrxf = [LF, LF, -LB, -LB, LF]
+    vrxf = [LF, LF, LB, LB, LF]
     vryf = [-W/2.0, W/2.0, W/2.0, -W/2.0, -W/2.0]
   
     # bubble parameter
-    DF = (LF + LB)/2.0 - LB
-    DFR = (LF + LB)/2.0 + body.w / 9
+    DF = (LF - LB)/2.0 + LB
+    DFR = (LF - LB)/2.0 + W / 9
 
     # check front trailer
     if !check_collision(x, y, yaw0, kdtree, ox, oy, DF, DFR, vrxf, vryf)

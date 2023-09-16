@@ -6,33 +6,32 @@
 
 module trailer_hybrid_a_star
 
-using Revise
 using PyPlot
 using DataFrames
 using NearestNeighbors
 using DataStructures 
 using YAML
+param = YAML.load_file("/home/yangbo/Code/DifferentialFlatness/config/hybrid_a_star.yml")
+name = "settings_a"
 
-includet("rs_path.jl")
-includet("grid_a_star.jl")
-includet("trailerlib.jl")
+include("rs_path.jl")
+include("grid_a_star.jl")
+include("trailerlib.jl")
 
-param = YAML.load_file("../../config/hybrid_a_star.yml")
-
-const XY_GRID_RESOLUTION = 2.0 #[m]
-const YAW_GRID_RESOLUTION = deg2rad(15.0) #[rad]
-const GOAL_TYAW_TH = deg2rad(5.0) #[rad]
-const MOTION_RESOLUTION = 0.1 #[m] path interporate resolution
-const N_STEER = 20.0 # number of steer command
-const EXTEND_AREA= 5.0 #[m] map extend length
-const SKIP_COLLISION_CHECK= 4 # skip number for collision check
+const XY_GRID_RESOLUTION = param[name]["config"]["XY_GRID_RESOLUTION"] #[m]
+const YAW_GRID_RESOLUTION = param[name]["config"]["YAW_GRID_RESOLUTION"] #[rad]
+const GOAL_TYAW_TH = param[name]["config"]["GOAL_TYAW_TH"] #[rad]
+const MOTION_RESOLUTION = param[name]["config"]["MOTION_RESOLUTION"] #[m] path interporate resolution
+const N_STEER = param[name]["config"]["N_STEER"] # number of steer command
+const EXTEND_AREA= param[name]["config"]["EXTEND_AREA"] #[m] map extend length
+const SKIP_COLLISION_CHECK= param[name]["config"]["SKIP_COLLISION_CHECK"] # skip number for collision check
  
-const SB_COST = 100.0 # switch back penalty cost
-const BACK_COST = 5.0 # backward penalty cost
-const STEER_CHANGE_COST = 5.0 # steer angle change penalty cost
-const STEER_COST = 1.0 # steer angle change penalty cost
-const JACKKNIF_COST= 200.0 # Jackknif cost
-const H_COST = 5.0 # Heuristic cost
+const SB_COST = param[name]["cost"]["SB_COST"] # switch back penalty cost
+const BACK_COST = param[name]["cost"]["BACK_COST"] # backward penalty cost
+const STEER_CHANGE_COST = param[name]["cost"]["STEER_CHANGE_COST"] # steer angle change penalty cost
+const STEER_COST = param[name]["cost"]["STEER_COST"] # steer angle change penalty cost
+const JACKKNIF_COST= param[name]["cost"]["JACKKNIF_COST"] # Jackknif cost
+const H_COST = param[name]["cost"]["H_COST"] # Heuristic cost
  
 const WB = trailerlib.WB #[m] Wheel base
 const LT = trailerlib.LT #[m] length of trailer
